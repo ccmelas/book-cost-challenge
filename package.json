@@ -1,0 +1,15 @@
+{
+  "name": "book-cost-challenge",
+  "version": "1.0.0",
+  "description": "Book cost challenge",
+  "main": "index.js",
+  "scripts": {
+    "test:watch": "jest index.test.js --watch",
+    "test": "jest index.test.js"
+  },
+  "author": "Chiemela Chinedum",
+  "license": "ISC",
+  "devDependencies": {
+    "jest": "^24.8.0"
+  }
+}
