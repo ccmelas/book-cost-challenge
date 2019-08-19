@@ -1,5 +1,6 @@
 const BOOK_COST = 8;
 
+const cache = {};
 const hasSameItems = cart => {
     const start = cart[0];
 
@@ -23,7 +24,7 @@ const getSetDiscount = setCount => {
 }
 
 const groupCart = cart => {
-    const groupedCart = {};
+    const groupedCart = {1:0,2:0,3:0,4:0,5:0};
 
     for (item of cart){
         if (groupedCart[item]) groupedCart[item]++
@@ -33,55 +34,48 @@ const groupCart = cart => {
     return groupedCart;
 }
 
-const getSetWithBestDiscount = sets => {
-    let discount = -1;
-    let bestSet = [];
-
-    sets.forEach(set => {
-        const setDiscount = set.reduce((total, current) => total + getSetDiscount(current), 0);
-        if (setDiscount > discount) {
-            discount = setDiscount;
-            bestSet = set;
-        }
-    });
-
-    return bestSet;
-}
-
-const generateSets = groupedCart => {
-    const sets = [];
-    while (Object.keys(groupedCart).length) {
-        let currentSet = 0;
-        for(const item in groupedCart) {
-            currentSet++;
-            groupedCart[item]--;
-
-            if (!groupedCart[item]) {
-                delete groupedCart[item];
-            }
-        }
-        sets.push(currentSet);
+const getCost = (values, level = 1, costs = []) => {
+    if (values.every(value => value === 1 || value === 0)) {
+        // Calculate cost
+        const books = values.filter(value => value === 1);
+        const bookCost = books.length * BOOK_COST;
+        const discount = bookCost * getSetDiscount(books.length);
+        const cost = bookCost - discount;
+        return cost;
     }
 
-    return [sets];
-}
+    const levelCosts = [];
+    for(let i = 0; i < values.length; i++) {
+        const stepValues = [...values];
+        stepValues[i]--;
+        if (stepValues[i] < 0) continue;
 
-const getSetPrice = setCount => setCount * BOOK_COST;
+        const subset = Array(5).fill(0);
+        subset[i] = 1;
+        const subsetCost = getCost(subset);
+        let mainsetCost;
+        const cachekey = stepValues.join('|');
+        if (cache[stepValues.join('|')]) {
+            mainsetCost = cache[cachekey];
+        } else {
+            mainsetCost = getCost(stepValues, level + 1, costs);
+            cache[cachekey] = mainsetCost;
+        }
+        levelCosts.push(mainsetCost + subsetCost);
+    }
+
+    return Math.min(...levelCosts);
+}
 
 const calculatePrice = cart => {
     if (!cart || !cart.length) return 0;
-    // if (hasSameItems(cart))  return BOOK_COST * cart.length; 
+    if (hasSameItems(cart))  return BOOK_COST * cart.length; 
 
     const groupedCart = groupCart(cart);
 
-    const sets = getSetWithBestDiscount(generateSets(groupedCart));
-    
-    const price = sets.reduce((total, current) => {
-        const setPrice = getSetPrice(current);
-        return total + (setPrice - (setPrice * getSetDiscount(current)))
-    }, 0);
-
-    return price;
+    const groupValues = Object.values(groupedCart);
+    const cost = getCost(groupValues);
+    return cost;
 }
 
 module.exports = calculatePrice;

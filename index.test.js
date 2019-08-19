@@ -25,8 +25,8 @@ test('Unique cart discounts', () => {
     expect(calculatePrice([1, 2, 3, 4, 5])).toBe(30);
 });
 
-// test('Mixed cart discounts', () => {
-
-//     expect(calculatePrice([1, 1, 2, 2, 3, 3, 4, 5])).toBe(51.2);
-//     calculatePrice([1, 1, 2, 2, 3, 3, 4, 5]);
-// });
+test('Mixed cart discounts', () => {
+    expect(calculatePrice([1, 1, 2])).toBe(23.2);
+    // expect(calculatePrice([1, 1, 2, 2])).toBe(30.4);
+    // expect(calculatePrice([1, 1, 2, 2, 3, 3, 4, 5])).toBe(51.2);
+});
